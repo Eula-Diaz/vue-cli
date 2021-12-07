@@ -5,6 +5,7 @@ import router from './router'
 import store from './store'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+import http from 'axios'
 // import { Button, Select, Container, Aside, Main, Header, Menu, MenuItem, Submenu, MenuItemGroup } from 'element-ui';
 
 Vue.config.productionTip = false
@@ -20,7 +21,9 @@ Vue.use(ElementUI)
 // Vue.use(MenuItem)
 // Vue.use(Submenu)
 // Vue.use(MenuItemGroup)
+Vue.prototype.$http = http
 
+if(process.env.NODE_ENV === 'development') require('@/api/mock')
 new Vue({
   router,
   store,

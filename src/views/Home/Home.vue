@@ -46,58 +46,33 @@
           </div>
         </el-card>
       </div>
-      <el-card shadow="hover" style="height: 280px"></el-card>
+      <el-card shadow="hover" style="height: 280px">
+        <!-- <div style="height: 280px" ref="echart"></div> -->
+        <echart :chartData="echartData.order" style="height: 280px" />
+      </el-card>
       <div class="graph">
-        <el-card shadow="hover" style="height: 280px"></el-card>
-        <el-card shadow="hover" style="height: 280px"></el-card>
+        <el-card shadow="hover" style="height: 280px">
+          <!-- <div style="height: 240px" ref="userEchart"></div> -->
+          <echart :chartData="echartData.user" style="height: 240px" />
+        </el-card>
+        <el-card shadow="hover" style="height: 280px">
+          <!-- <div style="height: 240px" ref="videoEchart"></div> -->
+          <echart :chartData="echartData.video" style="height: 240px" :isAxisChart="false"/>
+        </el-card>
       </div>
     </el-col>
   </el-row>
 </template>
 
 <script>
+import { getHome } from '../../api/data'
+import Echart from '../../components/Echarts.vue'
 export default {
+  components: { Echart },
   data () {
     return {
       userImg: require('../../assets/images/user.jpg'),
-      tableData: [
-        {
-          name: 'oppo',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800
-        },
-        {
-          name: 'vivo',
-          todayBuy: 100000000000000,
-          monthBuy: 300,
-          totalBuy: 800
-        },
-        {
-          name: 'iPhone',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800
-        },
-        {
-          name: 'HUAWEI',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800
-        },
-        {
-          name: 'Xiaomi',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800
-        },
-        {
-          name: 'Meizu',
-          todayBuy: 100,
-          monthBuy: 300,
-          totalBuy: 800
-        }
-      ],
+      tableData: [],
       tableLabel: {
         name: '课程',
         todayBuy: '今日购买',
@@ -141,8 +116,66 @@ export default {
           icon: 's-goods',
           color: '#5ab1ef'
         }
-      ]
+      ],
+      echartData: {
+        order: {
+          xData: [],
+          series: []
+        },
+        user: {
+          xData: [],
+          series: []          
+        },
+        video: {
+          series: []
+        }
+      }
     }
+  },
+  methods: {
+    getTableData () {
+      getHome().then((res) => {
+        this.tableData = res.data.tableData
+        const order = res.data.orderData
+        let keyArray = Object.keys(order.data[0])
+
+        this.echartData.order.xData = order.date
+        keyArray.forEach((key) => {
+          this.echartData.order.series.push({
+            name: key,
+            data: order.data.map((item) => item[key]),
+            type: 'line'
+          })
+        })
+
+        // const myEchartsOrder = echarts.init(this.$refs.echart)
+        // myEchartsOrder.setOption(this.echartsData.order)
+
+        this.echartData.user.xData = res.data.userData.map((item) => item.date)
+        this.echartData.user.series.push({
+          name: '新增用户',
+          data: res.data.userData.map((item) => item.new),
+          type: 'bar'
+        })
+        this.echartData.user.series.push({
+          name: '活跃用户',
+          data: res.data.userData.map((item) => item.active),
+          type: 'bar'
+        }) 
+        // const myEchartsUser = echarts.init(this.$refs.userEchart)
+        // myEchartsUser.setOption(this.echartsData.user)
+
+        this.echartData.video.series.push({
+          data: res.data.videoData,
+          type: 'pie'
+        })
+        // const myEchartsVideo = echarts.init(this.$refs.videoEchart)
+        // myEchartsVideo.setOption(this.echartsData.video)  
+      })
+    }
+  },
+  mounted () {
+    this.getTableData()
   }
 }
 </script>
